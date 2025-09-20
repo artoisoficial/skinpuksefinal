@@ -1,0 +1,1 @@
+console.log("✅ SkinPulse carregado com sucesso!");
