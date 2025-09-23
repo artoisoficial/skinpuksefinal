@@ -1,0 +1,32 @@
+[
+  {
+    "id": "ak-47-redline",
+    "name": "AK-47 | Redline",
+    "rarity": "Restricted",
+    "float": 0.12,
+    "price": 45.5,
+    "sold7": 10,
+    "min30": 40.0,
+    "max30": 50.0
+  },
+  {
+    "id": "awp-asimov",
+    "name": "AWP | Asiimov",
+    "rarity": "Covert",
+    "float": 0.25,
+    "price": 180.0,
+    "sold7": 3,
+    "min30": 150.0,
+    "max30": 200.0
+  },
+  {
+    "id": "m4a1-s-hotrod",
+    "name": "M4A1-S | Hot Rod",
+    "rarity": "Classified",
+    "float": 0.03,
+    "price": 320.0,
+    "sold7": 1,
+    "min30": 300.0,
+    "max30": 350.0
+  }
+]
