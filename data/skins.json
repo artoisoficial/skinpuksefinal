@@ -1,0 +1,13 @@
+[
+  {
+    "id": "ak-47-redline",
+    "name_pt": "AK-47 | Redline",
+    "name_en": "AK-47 | Redline",
+    "rarity": "Restricted",
+    "float": 0.12,
+    "price": 45.5,
+    "sold7": 10,
+    "min30": 40.0,
+    "max30": 50.0
+  }
+]
