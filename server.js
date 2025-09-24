@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
@@ -90,5 +90,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public','index.html'));
 });
 
-const port = parseInt(process.env.PORT || '10000');
-app.listen(port, ()=>{ console.log('SkinPulse mock server running on port', port); });
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
