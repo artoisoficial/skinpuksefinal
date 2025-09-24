@@ -7,9 +7,20 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <header class="topbar"><h1>SkinPulse</h1><nav><a href="#" data-link="home">Home</a> | <a href="#" data-link="skins">Skins</a> | <a href="#" data-link="plans">Planos</a> | <a href="#" data-link="dashboard">Minha Conta</a></nav></header>
+  <header class="topbar">
+    <div class="container">
+      <h1>SkinPulse</h1>
+      <nav>
+        <a href="#" data-link="home">Início</a>
+        <a href="#" data-link="skins">Skins</a>
+        <a href="#" data-link="plans">Planos</a>
+        <a href="#" data-link="account">Minha Conta</a>
+      </nav>
+      <div class="lang"><select id="langSelect"><option value="pt">PT</option><option value="en">EN</option></select></div>
+    </div>
+  </header>
   <main id="app"></main>
-  <footer style="text-align:center;padding:20px;color:#666">SkinPulse &copy; 2025</footer>
+  <footer class="footer">SkinPulse &copy; 2025</footer>
   <script src="/app.js"></script>
 </body>
 </html>

@@ -1,90 +1,23 @@
 const app = document.getElementById('app');
-const routes = {
-  home: renderHome,
-  skins: renderSkins,
-  plans: renderPlans,
-  dashboard: renderDashboard
-};
+let lang = localStorage.getItem('sp_lang') || 'pt';
+document.addEventListener('DOMContentLoaded', ()=>{ document.getElementById('langSelect').value = lang; document.getElementById('langSelect').addEventListener('change', (e)=>{ lang = e.target.value; localStorage.setItem('sp_lang', lang); renderRoute(currentRoute); }); const p = location.pathname.replace('/','')||'home'; renderRoute(p); const top = document.querySelector('.topbar nav'); const loginLink = document.createElement('a'); loginLink.href='#'; loginLink.dataset.link='login'; loginLink.textContent='Login'; loginLink.style.marginLeft='10px'; const regLink = document.createElement('a'); regLink.href='#'; regLink.dataset.link='register'; regLink.textContent='Cadastrar'; regLink.style.marginLeft='10px'; top.appendChild(loginLink); top.appendChild(regLink); });
 
-function navTo(route){
-  history.pushState({route}, '', '/'+route);
-  routes[route]();
-}
-document.addEventListener('click', e=>{
-  if(e.target.matches('[data-link]')){ e.preventDefault(); navTo(e.target.dataset.link); }
-});
+const routes = { home: renderHome, skins: renderSkins, plans: renderPlans, account: renderAccount };
+let currentRoute = 'home';
+function navTo(r){ currentRoute = r; history.pushState({r}, '', '/'+r); renderRoute(r); }
+window.addEventListener('popstate', ()=>{ const p = location.pathname.replace('/','')||'home'; currentRoute = p; renderRoute(p); });
 
-window.addEventListener('popstate', ()=>{
-  const p = location.pathname.replace('/','')||'home';
-  (routes[p]||renderHome)();
-});
-
-function header(){ return '<div class="container"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2>SkinPulse</h2><p>Ferramenta de acompanhamento de skins</p></div><div><a class="btn" href="#" data-link="plans">Assinar</a></div></div></div>'; }
-
-function renderHome(){
-  app.innerHTML = header() + `<div class="container"><div class="card"><h3>Bem-vindo à SkinPulse</h3><p>Plataforma de exemplo com listagem de skins e sistema de assinatura (mock).</p></div></div>`;
-}
-
-async function renderSkins(){
-  const res = await fetch('/api/skins');
-  const skins = await res.json();
-  let html = header() + '<div class="container"><h3>Skins</h3>';
-  skins.forEach(s=>{
-    html += `<div class="card"><strong>${s.name}</strong> — ${s.rarity} — R$ ${s.price.toFixed(2)}<br>Float: ${s.float} — Vendidos 7d: ${s.sold7}</div>`;
-  });
-  html += '</div>';
-  app.innerHTML = html;
-}
-
-function renderPlans(){
-  const plans = [{id:'monthly',name:'Mensal',price:16.90,desc:'Acesso mensal'},{id:'quarter',name:'Trimestral',price:44.90,desc:'3 meses'},{id:'annual',name:'Anual',price:144.00,desc:'12 meses - R$12/mês equivalente'}];
-  let html = header() + '<div class="container"><h3>Planos</h3>';
-  plans.forEach(p=> html += `<div class="card"><strong>${p.name}</strong> — R$ ${p.price.toFixed(2)} <p>${p.desc}</p><button class="btn" onclick="subscribe('${p.id}')">Assinar</button></div>`);
-  html += '</div>'; app.innerHTML = html;
-}
-
-async function subscribe(plan){
-  const token = localStorage.getItem('sp_token')||null;
-  const res = await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,plan})});
-  const j = await res.json();
-  if(j.ok){ alert('Assinatura criada: '+j.subscription.id); localStorage.setItem('sp_sub', j.subscription.id); navTo('dashboard'); }
-  else alert('Erro: '+(j.error||'unknown'));
-}
-
-function loggedUser(){ const s = localStorage.getItem('sp_user'); return s?JSON.parse(s):null; }
-
-function renderDashboard(){
-  const user = loggedUser();
-  if(!user){ app.innerHTML = header() + `<div class="container"><h3>Minha Conta</h3><p>Por favor <a href="#" data-link="login">entre</a> ou <a href="#" data-link="register">cadastre-se</a>.</p></div>`; return; }
-  let html = header() + `<div class="container"><h3>Olá, ${user.name||user.email}</h3>`;
-  html += `<div class="card"><strong>Assinatura:</strong> ${localStorage.getItem('sp_sub')||'Nenhuma'}</div>`;
-  html += `<div class="card"><button class="btn" onclick="logout()">Sair</button></div></div>`;
-  app.innerHTML = html;
-}
-
+function t(pt,en){ return lang==='pt'?pt:en; }
+function header(){ return '<div class="container"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2>SkinPulse</h2><p>'+t('Ferramenta de monitoramento de skins','Skins monitoring tool')+'</p></div><div><a class="btn" href="#" onclick="navTo(\'plans\')">'+t('Assinar','Subscribe')+'</a></div></div></div>'; }
+function renderRoute(r){ (routes[r]||renderHome)(); }
+function renderHome(){ app.innerHTML = header() + `<div class="container"><div class="card"><h3>${t('Bem-vindo à SkinPulse','Welcome to SkinPulse')}</h3><p>${t('Plataforma de teste com listagem de skins.','Test platform with skins list.')}</p></div></div>`; }
+async function renderSkins(){ const res = await fetch('/api/skins'); const skins = await res.json(); let html = header() + '<div class="container"><h3>'+t('Skins','Skins')+'</h3>'; skins.forEach(s=>{ const name = lang==='pt'?s.name_pt:s.name_en; html += `<div class="card"><strong>${name}</strong> — ${s.rarity} — R$ ${s.price.toFixed(2)}<br>Float: ${s.float} — ${t('Vendidos 7d','Sold 7d')}: ${s.sold7}<br>${t('Min 30d','Min 30d')}: R$ ${s.min30} — ${t('Max 30d','Max 30d')}: R$ ${s.max30}</div>`; }); html += '</div>'; app.innerHTML = html; }
+function renderPlans(){ const plans = [{id:'monthly',name:t('Mensal','Monthly'),price:16.90,desc:t('Acesso mensal','Monthly access')},{id:'quarter',name:t('Trimestral','Quarterly'),price:44.90,desc:t('3 meses','3 months')},{id:'annual',name:t('Anual','Annual'),price:144.00,desc:t('12 meses - R$12/mês equivalente','12 months - R$12/month equivalent')}]; let html = header() + '<div class="container"><h3>'+t('Planos','Plans')+'</h3>'; plans.forEach(p=> html += `<div class="card"><strong>${p.name}</strong> — R$ ${p.price.toFixed(2)} <p>${p.desc}</p><button class="btn" onclick="subscribe('${p.id}')">${t('Assinar','Subscribe')}</button></div>`); html += '</div>'; app.innerHTML = html; }
+async function subscribe(plan){ const token = localStorage.getItem('sp_token')||null; const body = new URLSearchParams(); body.append('plan', plan); body.append('token', token); const res = await fetch('/api/subscribe',{method:'POST',body: body}); const j = await res.json(); if(j.ok){ alert(t('Assinatura criada:','Subscription created:')+j.subscription.id); localStorage.setItem('sp_sub', j.subscription.id); navTo('account'); } else alert('Erro'); }
+function logged(){ const s = localStorage.getItem('sp_user'); return s?JSON.parse(s):null; }
+function renderAccount(){ const user = logged(); if(!user){ app.innerHTML = header() + `<div class="container"><h3>${t('Minha Conta','My Account')}</h3><p>${t('Por favor faça login ou cadastre-se.','Please login or register.')}</p><div class="card"><button class="btn" onclick="navTo('login')">${t('Login','Login')}</button> <button class="btn" onclick="navTo('register')">${t('Cadastrar','Register')}</button></div></div>`; return;} let html = header() + `<div class="container"><h3>${t('Olá,','Hello,')} ${user.name||user.email}</h3>`; html += `<div class="card"><strong>${t('Assinatura:','Subscription:')}</strong> ${localStorage.getItem('sp_sub')||t('Nenhuma','None')}</div>`; html += `<div class="card"><button class="btn" onclick="logout()">${t('Sair','Logout')}</button></div></div>`; app.innerHTML = html; }
 function logout(){ localStorage.removeItem('sp_token'); localStorage.removeItem('sp_user'); navTo('home'); }
-
-document.addEventListener('DOMContentLoaded', async ()=>{
-  const p = location.pathname.replace('/','')||'home';
-  (routes[p]||renderHome)();
-  const top = document.querySelector('.topbar nav');
-  const loginLink = document.createElement('a'); loginLink.href='#'; loginLink.dataset.link='login'; loginLink.textContent='Login'; loginLink.style.marginLeft='10px';
-  const regLink = document.createElement('a'); regLink.href='#'; regLink.dataset.link='register'; regLink.textContent='Cadastrar'; regLink.style.marginLeft='10px';
-  top.appendChild(loginLink); top.appendChild(regLink);
-});
-
-window.renderLogin = function(){
-  app.innerHTML = header() + `<div class="container"><h3>Login</h3><div class="card"><div class="form-row"><input id="email" placeholder="email"></div><div class="form-row"><input id="password" type="password" placeholder="senha"></div><div><button class="btn" onclick="doLogin()">Entrar</button></div></div></div>`;
-}
-window.renderRegister = function(){
-  app.innerHTML = header() + `<div class="container"><h3>Cadastrar</h3><div class="card"><div class="form-row"><input id="rname" placeholder="nome"></div><div class="form-row"><input id="remail" placeholder="email"></div><div class="form-row"><input id="rpassword" type="password" placeholder="senha"></div><div><button class="btn" onclick="doRegister()">Criar conta</button></div></div></div>`;
-}
-window.doRegister = async function(){
-  const name=document.getElementById('rname').value; const email=document.getElementById('remail').value; const password=document.getElementById('rpassword').value;
-  const res = await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
-  const j = await res.json(); if(j.ok){ alert('Conta criada'); localStorage.setItem('sp_user', JSON.stringify(j.user)); navTo('dashboard'); } else alert('Erro: '+(j.error||JSON.stringify(j)));
-}
-window.doLogin = async function(){
-  const email=document.getElementById('email').value; const password=document.getElementById('password').value;
-  const res = await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
-  const j = await res.json(); if(j.ok){ localStorage.setItem('sp_token', j.token); localStorage.setItem('sp_user', JSON.stringify(j.user)); navTo('dashboard'); } else alert('Erro: '+(j.error||JSON.stringify(j))); }
+window.renderLogin = function(){ app.innerHTML = header() + `<div class="container"><h3>${t('Login','Login')}</h3><div class="card"><div class="form-row"><input id="email" placeholder="email"></div><div class="form-row"><input id="password" type="password" placeholder="senha"></div><div><button class="btn" onclick="doLogin()">${t('Entrar','Enter')}</button></div></div></div>`; }
+window.renderRegister = function(){ app.innerHTML = header() + `<div class="container"><h3>${t('Cadastrar','Register')}</h3><div class="card"><div class="form-row"><input id="rname" placeholder="nome"></div><div class="form-row"><input id="remail" placeholder="email"></div><div class="form-row"><input id="rpassword" type="password" placeholder="senha"></div><div><button class="btn" onclick="doRegister()">${t('Criar conta','Create account')}</button></div></div></div>`; }
+window.doRegister = async function(){ const name=document.getElementById('rname').value; const email=document.getElementById('remail').value; const password=document.getElementById('rpassword').value; const res = await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})}); const j = await res.json(); if(j.ok){ alert(t('Conta criada','Account created')); localStorage.setItem('sp_user', JSON.stringify(j.user)); navTo('account'); } else alert(t('Erro ao criar conta','Error creating account')+': '+(j.detail||JSON.stringify(j))); }
+window.doLogin = async function(){ const email=document.getElementById('email').value; const password=document.getElementById('password').value; const body = new URLSearchParams(); body.append('email', email); body.append('password', password); const res = await fetch('/api/auth/login',{method:'POST',body: body}); const j = await res.json(); if(j.ok){ localStorage.setItem('sp_token', j.token); localStorage.setItem('sp_user', JSON.stringify(j.user)); navTo('account'); } else alert(t('Erro de login','Login error')+': '+(j.detail||JSON.stringify(j))); }
